@@ -3,32 +3,32 @@ from graph_store import connect_graph
 
 
 def seed_synthetic_data():
-    """Create repeatable synthetic data for HeatPath testing."""
+    """Create repeatable synthetic records using HeatPath's current schema."""
     client, graph = connect_graph()
 
     queries = [
         """
-        MERGE (h:Hotspot {id: 'zone_a'})
+        MERGE (h:HeatZone {id: 'zone_a'})
         SET h.name = 'Synthetic Hotspot A',
             h.temperature_c = 40.1,
             h.measurement_date = '2026-10-10',
             h.data_status = 'synthetic'
         """,
         """
-        MERGE (h:Hotspot {id: 'zone_b'})
+        MERGE (h:HeatZone {id: 'zone_b'})
         SET h.name = 'Synthetic Hotspot B',
             h.temperature_c = 39.5,
             h.measurement_date = '2026-10-10',
             h.data_status = 'synthetic'
         """,
         """
-        MERGE (r:Risk {id: 'risk_a'})
+        MERGE (r:RiskFactor {id: 'risk_a'})
         SET r.name = 'Low shade',
             r.severity = 0.8,
             r.data_status = 'synthetic'
         """,
         """
-        MERGE (r:Risk {id: 'risk_b'})
+        MERGE (r:RiskFactor {id: 'risk_b'})
         SET r.name = 'Very low vegetation',
             r.severity = 0.9,
             r.data_status = 'synthetic'
@@ -59,45 +59,48 @@ def seed_synthetic_data():
             i.data_status = 'synthetic'
         """,
         """
-        MATCH (h:Hotspot {id: 'zone_a'}),
-              (r:Risk {id: 'risk_a'})
+        MATCH (h:HeatZone {id: 'zone_a'}),
+              (r:RiskFactor {id: 'risk_a'})
         MERGE (h)-[:HAS_RISK]->(r)
         """,
         """
-        MATCH (h:Hotspot {id: 'zone_b'}),
-              (r:Risk {id: 'risk_b'})
+        MATCH (h:HeatZone {id: 'zone_b'}),
+              (r:RiskFactor {id: 'risk_b'})
         MERGE (h)-[:HAS_RISK]->(r)
         """,
         """
-        MATCH (h:Hotspot {id: 'zone_a'}),
+        MATCH (h:HeatZone {id: 'zone_a'}),
               (e:Evidence {id: 'evidence_a'})
         MERGE (h)-[:SUPPORTED_BY]->(e)
         """,
         """
-        MATCH (h:Hotspot {id: 'zone_b'}),
+        MATCH (h:HeatZone {id: 'zone_b'}),
               (e:Evidence {id: 'evidence_b'})
         MERGE (h)-[:SUPPORTED_BY]->(e)
         """,
         """
-        MATCH (h:Hotspot {id: 'zone_a'}),
+        MATCH (h:HeatZone {id: 'zone_a'}),
               (f:Facility {id: 'facility_a'})
         MERGE (h)-[:NEARBY_FACILITY]->(f)
         """,
         """
-        MATCH (h:Hotspot {id: 'zone_a'}),
+        MATCH (h:HeatZone {id: 'zone_a'}),
               (i:Intervention {id: 'intervention_a'})
         MERGE (h)-[:HAS_INTERVENTION]->(i)
         """,
     ]
 
-    for query in queries:
-        graph.query(query)
+    try:
+        for query in queries:
+            graph.query(query)
 
-    print("Synthetic HeatPath graph data seeded successfully.")
-    print("Hotspots: zone_a, zone_b")
-    print("All records are synthetic, not real-world findings.")
-
-    return client
+        print("Synthetic HeatPath graph data seeded successfully.")
+        print("Hotspots: zone_a, zone_b")
+        print("All records are synthetic, not real-world findings.")
+    finally:
+        close = getattr(client, "close", None)
+        if callable(close):
+            close()
 
 
 if __name__ == "__main__":
