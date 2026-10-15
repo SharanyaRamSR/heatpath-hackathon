@@ -72,6 +72,22 @@ class DecisionEngineTests(unittest.TestCase):
         )
         self.assertIsNone(result["winner"])
 
+    def test_different_measurement_dates_never_select_winner(self):
+        report_a = make_report("a", 42.0, "verified", "verified")
+        report_b = make_report("b", 35.0, "verified", "verified")
+        report_b["hotspot"]["measurement_date"] = "2026-10-11"
+        result = compare_hotspots(report_a, report_b)
+        self.assertEqual(result["status"], "INSUFFICIENT_EVIDENCE")
+        self.assertIsNone(result["winner"])
+        self.assertTrue(any("Measurement dates differ" in r for r in result["reasons"]))
+
+    def test_verified_data_still_needs_prioritization_policy(self):
+        report_a = make_report("a", 42.0, "verified", "verified")
+        report_b = make_report("b", 35.0, "verified", "verified")
+        result = compare_hotspots(report_a, report_b)
+        self.assertEqual(result["status"], "INSUFFICIENT_EVIDENCE")
+        self.assertIsNone(result["winner"])
+        self.assertTrue(any("prioritization policy" in r for r in result["reasons"]))
 
 if __name__ == "__main__":
     unittest.main()
