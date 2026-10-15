@@ -64,6 +64,49 @@ HeatPath is designed to:
 
 The current decision engine conservatively returns `INSUFFICIENT_EVIDENCE` even when preliminary checks pass, because a validated prioritization policy has not yet been configured.
 
+Graph Queries
+
+HeatPath uses Cypher-style graph queries through the FalkorDB Python client.
+
+1. Retrieve a hotspot
+
+The agent looks up a hotspot by its ID and retrieves its name, temperature, measurement date, and data-verification status.
+
+MATCH (h:HeatZone {id: $hotspot_id})
+RETURN h.id, h.name, h.temperature_c,
+       h.measurement_date, h.data_status
+
+2. Traverse connected risk factors
+
+MATCH (h:HeatZone {id: $hotspot_id})
+      -[:HAS_RISK]->(r:RiskFactor)
+RETURN r.id, r.name, r.severity, r.data_status
+
+3. Retrieve linked evidence
+
+MATCH (h:HeatZone {id: $hotspot_id})
+      -[:SUPPORTED_BY]->(e:Evidence)
+RETURN e.id, e.name, e.confidence,
+       e.source_type, e.data_status
+
+4. Retrieve nearby facilities and interventions
+
+MATCH (h:HeatZone {id: $hotspot_id})
+      -[:NEARBY_FACILITY]->(f:Facility)
+RETURN f.id, f.name, f.facility_type, f.data_status
+
+MATCH (h:HeatZone {id: $hotspot_id})
+      -[:HAS_INTERVENTION]->(i:Intervention)
+RETURN i.id, i.name, i.data_status
+
+These queries are parameterized by hotspot ID. Their results populate the investigation report used by the decision engine.
+
+Decision safeguards
+
+The decision engine checks whether both hotspot records exist, whether their data is verified, whether measurement dates are comparable, and whether directly linked verified evidence exists. Even when these checks pass, it does not select a winner until a validated prioritization policy is configured.
+
+The current demonstration uses synthetic records; these queries do not establish real-world evidence or validate actual heat-risk priorities.
+
 ## Data and Limitations
 
 Current testing uses synthetic records only. Names such as “Synthetic Hotspot A” and “Fictional thermal observation A” are test fixtures, not observations of actual locations.
