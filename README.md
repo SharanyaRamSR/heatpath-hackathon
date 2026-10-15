@@ -52,18 +52,6 @@ Key relationships include:
 
 Investigation history is stored separately from the hotspot evidence graph.
 
-## Decision-Safety Behavior
-
-HeatPath is designed to:
-
-- Avoid selecting a winner when a hotspot is missing or unverified.
-- Avoid treating synthetic data as verified real-world evidence.
-- Identify missing or insufficient supporting evidence.
-- Avoid using temperature alone as a basis for prioritization.
-- Preserve the reasons behind a decision in an audit record.
-
-The current decision engine conservatively returns `INSUFFICIENT_EVIDENCE` even when preliminary checks pass, because a validated prioritization policy has not yet been configured.
-
 Graph Queries
 
 HeatPath uses Cypher-style graph queries through the FalkorDB Python client.
@@ -105,7 +93,19 @@ Decision safeguards
 
 The decision engine checks whether both hotspot records exist, whether their data is verified, whether measurement dates are comparable, and whether directly linked verified evidence exists. Even when these checks pass, it does not select a winner until a validated prioritization policy is configured.
 
-The current demonstration uses synthetic records; these queries do not establish real-world evidence or validate actual heat-risk priorities.
+The current demonstration uses synthetic records; these queries do not establish real-world evidence or validate actual heat-risk priorities
+
+## Decision-Safety Behavior
+
+HeatPath is designed to:
+
+- Avoid selecting a winner when a hotspot is missing or unverified.
+- Avoid treating synthetic data as verified real-world evidence.
+- Identify missing or insufficient supporting evidence.
+- Avoid using temperature alone as a basis for prioritization.
+- Preserve the reasons behind a decision in an audit record.
+
+The current decision engine conservatively returns `INSUFFICIENT_EVIDENCE` even when preliminary checks pass, because a validated prioritization policy has not yet been configured.
 
 ## Data and Limitations
 
