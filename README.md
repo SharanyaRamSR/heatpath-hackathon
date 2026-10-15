@@ -22,7 +22,7 @@ HeatPath uses graph relationships to:
 
 Investigation history is currently used as context and is not allowed to override current evidence. Historical memory does not yet influence the decision engine.
 
-Hackathon Track
+## Hackathon Track
 
 Primary track: Track 01 — Agents That Act on Connected Data
 
@@ -52,7 +52,7 @@ Key relationships include:
 
 Investigation history is stored separately from the hotspot evidence graph.
 
-Graph Queries
+## Graph Queries
 
 HeatPath uses Cypher-style graph queries through the FalkorDB Python client.
 
@@ -89,7 +89,7 @@ RETURN i.id, i.name, i.data_status
 
 These queries are parameterized by hotspot ID. Their results populate the investigation report used by the decision engine.
 
-Decision safeguards
+### Decision safeguards
 
 The decision engine checks whether both hotspot records exist, whether their data is verified, whether measurement dates are comparable, and whether directly linked verified evidence exists. Even when these checks pass, it does not select a winner until a validated prioritization policy is configured.
 
