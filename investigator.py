@@ -1,17 +1,17 @@
 
 def _query_rows(graph, query, params=None):
-    """Run a FalkorDB query and return its result rows."""
+    """Execute a FalkorDB query and return its rows."""
     result = graph.query(query, params or {})
     return result.result_set
 
 
 def investigate_hotspot(graph, hotspot_id):
-    """Retrieve a hotspot and its connected graph records."""
+    """Retrieve a synthetic or real hotspot and connected records."""
 
     hotspot_rows = _query_rows(
         graph,
         """
-        MATCH (h:Hotspot {id: $hotspot_id})
+        MATCH (h:HeatZone {id: $hotspot_id})
         RETURN h.id, h.name, h.temperature_c,
                h.measurement_date, h.data_status
         """,
@@ -46,8 +46,8 @@ def investigate_hotspot(graph, hotspot_id):
         (
             "risks",
             """
-            MATCH (h:Hotspot {id: $hotspot_id})
-                  -[:HAS_RISK]->(r:Risk)
+            MATCH (h:HeatZone {id: $hotspot_id})
+                  -[:HAS_RISK]->(r:RiskFactor)
             RETURN r.id, r.name, r.severity, r.data_status
             """,
             ["id", "name", "severity", "data_status"],
@@ -55,20 +55,23 @@ def investigate_hotspot(graph, hotspot_id):
         (
             "evidence",
             """
-            MATCH (h:Hotspot {id: $hotspot_id})
+            MATCH (h:HeatZone {id: $hotspot_id})
                   -[:SUPPORTED_BY]->(e:Evidence)
             RETURN e.id, e.name, e.confidence,
                    e.source_type, e.data_status
             """,
             [
-                "id", "name", "confidence",
-                "source_type", "data_status",
+                "id",
+                "name",
+                "confidence",
+                "source_type",
+                "data_status",
             ],
         ),
         (
             "nearby_facilities",
             """
-            MATCH (h:Hotspot {id: $hotspot_id})
+            MATCH (h:HeatZone {id: $hotspot_id})
                   -[:NEARBY_FACILITY]->(f:Facility)
             RETURN f.id, f.name, f.facility_type, f.data_status
             """,
@@ -77,7 +80,7 @@ def investigate_hotspot(graph, hotspot_id):
         (
             "interventions",
             """
-            MATCH (h:Hotspot {id: $hotspot_id})
+            MATCH (h:HeatZone {id: $hotspot_id})
                   -[:HAS_INTERVENTION]->(i:Intervention)
             RETURN i.id, i.name, i.data_status
             """,
@@ -87,9 +90,10 @@ def investigate_hotspot(graph, hotspot_id):
 
     for section, query, fields in linked_queries:
         rows = _query_rows(
-            graph, query, {"hotspot_id": hotspot_id}
+            graph,
+            query,
+            {"hotspot_id": hotspot_id},
         )
-
         report[section] = [
             dict(zip(fields, values))
             for values in rows
@@ -106,19 +110,17 @@ def investigate_hotspot(graph, hotspot_id):
             "No directly linked evidence was found."
         )
 
-    unsupported_risks = [
-        risk["name"]
-        for risk in report["risks"]
-        if not any(
-            evidence["data_status"] == "verified"
-            for evidence in report["evidence"]
-        )
+    verified_evidence = [
+        evidence
+        for evidence in report["evidence"]
+        if evidence.get("data_status") == "verified"
     ]
 
-    if unsupported_risks:
-        report["warnings"].append(
-            "Risk claims lack verified linked evidence: "
-            + ", ".join(unsupported_risks)
-        )
+    if report["risks"] and not verified_evidence:
+        for risk in report["risks"]:
+            report["warnings"].append(
+                f"Risk '{risk.get('name', risk.get('id'))}' "
+                "has no directly linked verified evidence."
+            )
 
     return report
