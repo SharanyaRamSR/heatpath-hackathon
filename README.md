@@ -1,3 +1,4 @@
+
 # HeatPath — Graph-Powered Urban Heat Investigation Agent
 
 HeatPath is a graph-powered investigation agent built with Python and FalkorDB. It compares two urban heat hotspot records by traversing connected risks, supporting evidence, nearby facilities, interventions, and previous investigation records.
@@ -20,6 +21,16 @@ HeatPath uses graph relationships to:
 - Retrieve previous investigations and save a persistent audit record for each run.
 
 Investigation history is currently used as context and is not allowed to override current evidence. Historical memory does not yet influence the decision engine.
+
+Hackathon Track
+
+Primary track: Track 01 — Agents That Act on Connected Data
+
+HeatPath uses FalkorDB as its graph-backed investigation layer. It traverses relationships between heat zones, risk factors, evidence, nearby facilities, and interventions to construct investigation reports. It also stores investigation history in the graph for contextual reference.
+
+The agent applies conservative decision rules and returns "INSUFFICIENT_EVIDENCE" rather than selecting a hotspot when the available data is unverified or a validated prioritization policy is absent.
+
+Current scope: The demonstration uses synthetic hotspot records. It is a prototype, not a validated real-world urban heat prioritization system.
 
 ## Graph Architecture
 
