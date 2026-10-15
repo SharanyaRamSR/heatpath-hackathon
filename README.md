@@ -102,4 +102,4 @@ python heatpath_agent.py --a zone_a --b zone_b
 
 The command prints the hotspot investigation reports, previous investigations, decision result, and newly saved investigation ID. Each successful run writes a new `InvestigationHistory` record.
 
-**Important:** The graph must already
+**Important:** The graph must already contain the expected synthetic hotspot records ("zone_a" and "zone_b") before running the agent. For a fresh setup, configure the FalkorDB environment variables and run "python seed_synthetic_data.py" to populate the synthetic graph. Then run the agent using the command shown above. Each successful agent run saves a new "InvestigationHistory" record.
