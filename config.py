@@ -1,5 +1,8 @@
 
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 PROJECT_NAME = "HeatPath"
 PROJECT_VERSION = "0.1.0"
