@@ -59,7 +59,7 @@ Current testing uses synthetic records only. Names such as “Synthetic Hotspot 
 
 A metadata check is not proof that evidence is authentic. Missing dates indicate unknown freshness, not automatically stale evidence.
 
-HeatPath is a prototype. Its current tests cover three safety conditions: missing hotspots, synthetic data, and unverified hotspots. Broader testing, including evidence-quality edge cases and persistent-memory behavior, remains necessary before submission.
+HeatPath is a prototype. Its current automated tests cover five safety conditions: missing hotspots, synthetic data, unverified hotspots, differing measurement dates, and the absence of a validated prioritization policy. Broader testing, including evidence-quality edge cases and persistent-memory behavior, remains necessary before submission.
 
 ## Technology
 
