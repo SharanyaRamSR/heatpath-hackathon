@@ -1,48 +1,105 @@
-HeatPath — Graph-Powered Urban Heat Investigation Agent
+# HeatPath — Graph-Powered Urban Heat Investigation Agent
 
-HeatPath is an AI-agent project designed to compare urban heat hotspots by investigating connected risks, supporting evidence, and historical investigations using FalkorDB.
+HeatPath is a graph-powered investigation agent built with Python and FalkorDB. It compares two urban heat hotspot records by traversing connected risks, supporting evidence, nearby facilities, interventions, and previous investigation records.
 
-Rather than forcing a ranking from incomplete information, HeatPath aims to explain what the graph supports, identify missing evidence, and return an explicit insufficient-evidence result when a defensible decision cannot be made.
+HeatPath is designed to avoid unsupported prioritization. When the available records do not justify a defensible decision, it returns `INSUFFICIENT_EVIDENCE` rather than forcing a winner.
 
-Problem
+## Problem
 
-Urban heat prioritization requires more than comparing temperature values. Decision-makers also need supporting evidence, connected risks, relevant facilities, and an understanding of evidence quality and limitations.
+Urban heat prioritization cannot reliably depend on temperature alone. Investigators need to examine connected risk factors, supporting evidence, data provenance, verification status, and gaps in the available records.
 
-Proposed Solution
+## Solution
 
-HeatPath is being developed to:
+HeatPath uses graph relationships to:
 
-- Traverse graph relationships to investigate connected risks and evidence.
-- Explain findings using traceable graph records and relationships.
-- Identify unsupported risk claims and missing evidence metadata.
-- Use persistent investigation history as context without allowing it to override current verified evidence.
-- Avoid unsupported hotspot rankings when the evidence is insufficient.
+- Retrieve hotspot records and their connected risks.
+- Trace supporting evidence, nearby facilities, and interventions.
+- Identify unverified hotspot records and unsupported risk claims.
+- Compare two hotspots using explicit decision-safety checks.
+- Return an insufficient-evidence result when required evidence is missing or unverified.
+- Retrieve previous investigations and save a persistent audit record for each run.
 
-Technology
+Investigation history is currently used as context and is not allowed to override current evidence. Historical memory does not yet influence the decision engine.
 
-- Graph database: FalkorDB
-- Language: Python
-- Development environment: Google Colab
-- Source control: GitHub
+## Graph Architecture
 
-Data and Safety
+The synthetic graph uses the following node types:
 
-Initial development and testing use synthetic hotspot records. Synthetic data is intended to validate application logic only; it does not support claims about actual locations or real-world heat risk.
+- `HeatZone` — hotspot records and their metadata.
+- `RiskFactor` — connected risk factors.
+- `Evidence` — records intended to support an investigation.
+- `Facility` — nearby facilities.
+- `Intervention` — potential responses to identified risks.
+- `InvestigationHistory` — persistent investigation audit records.
 
-HeatPath is designed to distinguish metadata validation from evidence verification. Missing dates indicate unknown freshness, not necessarily stale evidence.
+Key relationships include:
 
-Hackathon Scope
+- `HAS_RISK`
+- `SUPPORTED_BY`
+- `NEARBY_FACILITY`
+- `HAS_INTERVENTION`
 
-Primary focus: Agents That Act on Connected Data.
+Investigation history is stored separately from the hotspot evidence graph.
 
-Additional focus, subject to implementation and testing: Agent Memory and Coordination.
+## Decision-Safety Behavior
 
-The implementation, tests, and demonstration will be developed and documented during the permitted hackathon build window.
+HeatPath is designed to:
 
-Project Status
+- Avoid selecting a winner when a hotspot is missing or unverified.
+- Avoid treating synthetic data as verified real-world evidence.
+- Identify missing or insufficient supporting evidence.
+- Avoid using temperature alone as a basis for prioritization.
+- Preserve the reasons behind a decision in an audit record.
 
-In development. Graph-dependent reasoning, persistent memory behavior, automated tests, and the complete demonstration workflow must be verified before the project is considered submission-ready.
+The current decision engine conservatively returns `INSUFFICIENT_EVIDENCE` even when preliminary checks pass, because a validated prioritization policy has not yet been configured.
 
-License
+## Data and Limitations
 
-No open-source license has been selected yet.
+Current testing uses synthetic records only. Names such as “Synthetic Hotspot A” and “Fictional thermal observation A” are test fixtures, not observations of actual locations.
+
+A metadata check is not proof that evidence is authentic. Missing dates indicate unknown freshness, not automatically stale evidence.
+
+HeatPath is a prototype. Its current tests cover three safety conditions: missing hotspots, synthetic data, and unverified hotspots. Broader testing, including evidence-quality edge cases and persistent-memory behavior, remains necessary before submission.
+
+## Technology
+
+- Python
+- FalkorDB graph database
+- `falkordb` Python client
+- `python-dotenv`
+- Google Colab
+- GitHub
+
+## Setup
+
+1. Clone this repository.
+2. Install the dependencies.
+3. Configure the FalkorDB connection using environment variables.
+4. Create or populate the expected synthetic graph before running the agent.
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Configure the following environment variables for your FalkorDB instance:
+
+- `FALKORDB_HOST`
+- `FALKORDB_PORT`
+- `FALKORDB_USERNAME`
+- `FALKORDB_PASSWORD`
+- `FALKORDB_GRAPH_NAME`
+- `FALKORDB_SSL`
+
+Do not commit passwords, access tokens, or other credentials to GitHub.
+
+Run the agent:
+
+```bash
+python heatpath_agent.py --a zone_a --b zone_b
+```
+
+The command prints the hotspot investigation reports, previous investigations, decision result, and newly saved investigation ID. Each successful run writes a new `InvestigationHistory` record.
+
+**Important:** The graph must already
