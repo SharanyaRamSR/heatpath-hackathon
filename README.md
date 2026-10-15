@@ -24,7 +24,7 @@ Investigation history is currently used as context and is not allowed to overrid
 
 ## Hackathon Track
 
-Primary track: Track 01 — Agents That Act on Connected Data
+Proposed track: Agents That Act on Connected Data
 
 HeatPath uses FalkorDB as its graph-backed investigation layer. It traverses relationships between heat zones, risk factors, evidence, nearby facilities, and interventions to construct investigation reports. It also stores investigation history in the graph for contextual reference.
 
@@ -93,7 +93,7 @@ These queries are parameterized by hotspot ID. Their results populate the invest
 
 The decision engine checks whether both hotspot records exist, whether their data is verified, whether measurement dates are comparable, and whether directly linked verified evidence exists. Even when these checks pass, it does not select a winner until a validated prioritization policy is configured.
 
-The current demonstration uses synthetic records; these queries do not establish real-world evidence or validate actual heat-risk priorities
+The current demonstration uses synthetic records; these queries do not establish real-world evidence or validate actual heat-risk priorities.
 
 ## Decision-Safety Behavior
 
