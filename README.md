@@ -60,25 +60,32 @@ HeatPath uses Cypher-style graph queries through the FalkorDB Python client.
 
 The agent looks up a hotspot by its ID and retrieves its name, temperature, measurement date, and data-verification status.
 
+```
 MATCH (h:HeatZone {id: $hotspot_id})
 RETURN h.id, h.name, h.temperature_c,
        h.measurement_date, h.data_status
+```
 
 2. Traverse connected risk factors
 
+```
 MATCH (h:HeatZone {id: $hotspot_id})
       -[:HAS_RISK]->(r:RiskFactor)
 RETURN r.id, r.name, r.severity, r.data_status
+```
 
 3. Retrieve linked evidence
 
+```
 MATCH (h:HeatZone {id: $hotspot_id})
       -[:SUPPORTED_BY]->(e:Evidence)
 RETURN e.id, e.name, e.confidence,
        e.source_type, e.data_status
+```
 
 4. Retrieve nearby facilities and interventions
 
+```
 MATCH (h:HeatZone {id: $hotspot_id})
       -[:NEARBY_FACILITY]->(f:Facility)
 RETURN f.id, f.name, f.facility_type, f.data_status
@@ -86,6 +93,7 @@ RETURN f.id, f.name, f.facility_type, f.data_status
 MATCH (h:HeatZone {id: $hotspot_id})
       -[:HAS_INTERVENTION]->(i:Intervention)
 RETURN i.id, i.name, i.data_status
+```
 
 These queries are parameterized by hotspot ID. Their results populate the investigation report used by the decision engine.
 
@@ -109,11 +117,27 @@ The current decision engine conservatively returns `INSUFFICIENT_EVIDENCE` even 
 
 ## Data and Limitations
 
-Current testing uses synthetic records only. Names such as “Synthetic Hotspot A” and “Fictional thermal observation A” are test fixtures, not observations of actual locations.
+HeatPath currently uses synthetic records only. Names such as “Synthetic Hotspot A” and “Fictional thermal observation A” are test fixtures, not observations of actual locations.
 
 A metadata check is not proof that evidence is authentic. Missing dates indicate unknown freshness, not automatically stale evidence.
 
-HeatPath is a prototype. Its current automated tests cover five safety conditions: missing hotspots, synthetic data, unverified hotspots, differing measurement dates, and the absence of a validated prioritization policy. Broader testing, including evidence-quality edge cases and persistent-memory behavior, remains necessary before submission.
+HeatPath is a prototype, not a validated real-world urban heat prioritization system. Its decision engine conservatively returns ```"INSUFFICIENT_EVIDENCE"``` when required evidence is missing, unverified, synthetic, or not directly comparable. Even when preliminary checks pass, the system does not select a winner because a validated prioritization policy has not yet been configured.
+
+### Testing and Verification
+
+The automated test suite contains five tests covering:
+
+- Missing hotspot records.
+- Synthetic data.
+- Unverified hotspot records.
+- Different measurement dates.
+- Verified records without a validated prioritization policy.
+
+All five automated tests passed in the latest recorded test run.
+
+Additional manual checks confirmed that the agent retrieves and persists investigation history, that shared and unique connected graph records are distinguished in a controlled comparison, and that past investigation history is not an input to the current decision function. A focused regression check also confirmed repeatable decisions for identical current reports and no forced winner without a prioritization policy.
+
+These checks validate the tested implementation paths; they do not establish the authenticity of evidence, the accuracy of real-world risk assessments, or the correctness of every possible graph and memory scenario. Broader testing with independently verified real-world data and a validated prioritization policy remains future work.
 
 ## Technology
 
